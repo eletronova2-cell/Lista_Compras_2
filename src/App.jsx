@@ -794,30 +794,39 @@ function TelaPreparar({ itens, setItens, selecionados, setSelecionados, onVoltar
             </button>
           </div>
           {totalEstim>0&&(
-            <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:"8px 14px",fontSize:12,color:"#34d399",fontWeight:700,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-              <span>💰 Estimativa: R$ {totalEstim.toFixed(2)}</span>
-              {totalSel > 0 && (
-                <button onClick={()=>{
-                  const itensSel = itens.filter(i=>selecionados.includes(i.id)).map(i=>({
-                    nome:i.nome, marca:i.marca||"", modelo:i.modelo||"",
-                    unidade:i.unidade, quantidade:i.quantidadeCompra??i.quantidade,
-                    preco:i.preco, categoria:i.categoria
-                  }));
-                  const payload = { versao:1, criado:new Date().toISOString(), itens:itensSel };
-                  const blob = new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-                  const file = new File([blob],"lista-compras.json",{type:"application/json"});
-                  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-                    navigator.share({ title:"Lista de Compras", text:`Lista com ${itensSel.length} itens — R$ ${totalEstim.toFixed(2)}`, files:[file] });
-                  } else {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a"); a.href=url; a.download="lista-compras.json"; a.click();
-                    URL.revokeObjectURL(url);
-                  }
-                }} style={{ background:"rgba(255,255,255,0.15)",border:"none",borderRadius:8,padding:"5px 12px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",alignItems:"center",gap:6 }}>
-                  📤 Compartilhar lista
-                </button>
-              )}
+            <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:"8px 14px",fontSize:12,color:"#34d399",fontWeight:700 }}>
+              💰 Estimativa: R$ {totalEstim.toFixed(2)}
             </div>
+          )}
+          {totalSel>0&&(
+            <button onClick={async ()=>{
+              const itensSel = itens.filter(i=>selecionados.includes(i.id)).map(i=>({
+                nome:i.nome, marca:i.marca||"", modelo:i.modelo||"",
+                unidade:i.unidade, quantidade:i.quantidadeCompra??i.quantidade,
+                preco:i.preco, categoria:i.categoria
+              }));
+              const payload = { versao:1, criado:new Date().toISOString(), itens:itensSel };
+              const json = JSON.stringify(payload, null, 2);
+              const blob = new Blob([json], {type:"application/json"});
+              const file = new File([blob], "lista-compras.json", {type:"application/json"});
+              // Tenta Web Share API com arquivo (Android Chrome nativo)
+              try {
+                if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+                  await navigator.share({ files:[file], title:"Lista de Compras" });
+                  return;
+                }
+              } catch(e) {
+                if(e.name !== "AbortError") console.warn("share failed:", e);
+                else return; // usuário cancelou
+              }
+              // Fallback: download do arquivo
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url; a.download = "lista-compras.json"; a.click();
+              setTimeout(()=>URL.revokeObjectURL(url), 1000);
+            }} style={{ marginTop:8,width:"100%",background:"linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.3))",border:"1.5px solid rgba(99,102,241,0.4)",borderRadius:10,padding:"10px 14px",color:"#a5b4fc",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+              📤 Compartilhar lista ({totalSel} {totalSel===1?"item":"itens"})
+            </button>
           )}
         </div>
       </div>
