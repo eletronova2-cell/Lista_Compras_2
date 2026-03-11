@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 
 const CATEGORIAS = {
@@ -321,7 +321,7 @@ function CatHeader({ catKey, grupo, showTotal }) {
 }
 
 // ─── TELA 0: Home ────────────────────────────────────────────────────────────
-function TelaHome({ itens, historico, temRascunho, selecionados, onIrListaBase, onIrPreparar, onIrComprar, onIrHistorico, onIrLocalizacao, onImportarLista }) {
+function TelaHome({ itens, historico, temRascunho, selecionados, onIrListaBase, onIrPreparar, onIrComprar, onIrHistorico, onIrLocalizacao }) {
   const totalBase = itens.filter(i=>i.quantidade>0).reduce((a,i)=>a+(i.preco*i.quantidade),0);
   const mesAtual  = new Date().toLocaleString("pt-BR",{month:"long"});
   const gastoMes  = historico.filter(r=>{ const d=new Date(r.data),n=new Date(); return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear(); }).reduce((a,r)=>a+r.pago,0);
@@ -354,31 +354,6 @@ function TelaHome({ itens, historico, temRascunho, selecionados, onIrListaBase, 
             </button>
           </div>
         )}
-
-        {/* Importar lista recebida pelo WhatsApp */}
-        <label style={{ display:"block", background:"rgba(99,102,241,0.08)", border:"1.5px dashed rgba(99,102,241,0.3)", borderRadius:16, padding:"14px 18px", marginBottom:16, cursor:"pointer", animation:"fadeUp 0.38s ease" }}>
-          <input type="file" accept=".json,application/json" style={{ display:"none" }} onChange={e=>{
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = ev => {
-              try {
-                const data = JSON.parse(ev.target.result);
-                if(data.versao===1 && Array.isArray(data.itens)) onImportarLista(data);
-                else alert("Arquivo inválido. Use uma lista exportada pelo app.");
-              } catch { alert("Não foi possível ler o arquivo."); }
-            };
-            reader.readAsText(file);
-            e.target.value = "";
-          }}/>
-          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <div style={{ fontSize:28 }}>📥</div>
-            <div>
-              <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:13, color:"#a5b4fc", marginBottom:2 }}>Importar lista recebida</div>
-              <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)" }}>Toque para abrir o arquivo .json recebido pelo WhatsApp</div>
-            </div>
-          </div>
-        </label>
 
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
           <button onClick={onIrListaBase} style={{ background:"linear-gradient(145deg,rgba(99,102,241,0.22),rgba(139,92,246,0.12))", border:"1.5px solid rgba(99,102,241,0.35)", borderRadius:20, padding:"20px 16px", textAlign:"left", cursor:"pointer", color:"#fff", animation:"fadeUp 0.4s ease" }}>
@@ -799,33 +774,21 @@ function TelaPreparar({ itens, setItens, selecionados, setSelecionados, onVoltar
             </div>
           )}
           {totalSel>0&&(
-            <button onClick={async ()=>{
+            <button onClick={()=>{
               const itensSel = itens.filter(i=>selecionados.includes(i.id)).map(i=>({
                 nome:i.nome, marca:i.marca||"", modelo:i.modelo||"",
                 unidade:i.unidade, quantidade:i.quantidadeCompra??i.quantidade,
                 preco:i.preco, categoria:i.categoria
               }));
-              const payload = { versao:1, criado:new Date().toISOString(), itens:itensSel };
-              const json = JSON.stringify(payload, null, 2);
-              const blob = new Blob([json], {type:"application/json"});
-              const file = new File([blob], "lista-compras.json", {type:"application/json"});
-              // Tenta Web Share API com arquivo (Android Chrome nativo)
-              try {
-                if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
-                  await navigator.share({ files:[file], title:"Lista de Compras" });
-                  return;
-                }
-              } catch(e) {
-                if(e.name !== "AbortError") console.warn("share failed:", e);
-                else return; // usuário cancelou
-              }
-              // Fallback: download do arquivo
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url; a.download = "lista-compras.json"; a.click();
-              setTimeout(()=>URL.revokeObjectURL(url), 1000);
-            }} style={{ marginTop:8,width:"100%",background:"linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.3))",border:"1.5px solid rgba(99,102,241,0.4)",borderRadius:10,padding:"10px 14px",color:"#a5b4fc",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              📤 Compartilhar lista ({totalSel} {totalSel===1?"item":"itens"})
+              const payload = { versao:1, itens:itensSel };
+              const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+              const link = `https://lista-compras-2-pi.vercel.app/#lista=${encoded}`;
+              const resumo = itensSel.map(i=>`• ${i.quantidade} ${i.unidade} de ${i.nome}`).join("%0A");
+              const msg = `🛒 *Lista de Compras*%0A%0A${resumo}%0A%0AAbra no app:%0A${encodeURIComponent(link)}`;
+              window.open(`https://wa.me/?text=${msg}`, "_blank");
+            }} style={{ marginTop:8,width:"100%",background:"linear-gradient(135deg,rgba(37,211,102,0.2),rgba(37,211,102,0.1))",border:"1.5px solid rgba(37,211,102,0.35)",borderRadius:10,padding:"10px 14px",color:"#25d366",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.549 4.116 1.51 5.847L0 24l6.337-1.481A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.371l-.36-.214-3.732.872.938-3.63-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+              Compartilhar no WhatsApp ({totalSel} {totalSel===1?"item":"itens"})
             </button>
           )}
         </div>
@@ -1812,6 +1775,21 @@ export default function App() {
 
   const [tela, setTela] = useState("home");
   const [registroAtual, setRegistroAtual] = useState(null);
+  const [listaRecebida, setListaRecebida] = useState(() => {
+    // Lê o hash da URL na inicialização (#lista=BASE64)
+    try {
+      const hash = window.location.hash;
+      if (!hash.startsWith("#lista=")) return null;
+      const encoded = hash.slice(7);
+      const json = decodeURIComponent(escape(atob(encoded)));
+      const data = JSON.parse(json);
+      if (data.versao === 1 && Array.isArray(data.itens)) {
+        window.history.replaceState(null, "", window.location.pathname);
+        return data;
+      }
+    } catch(e) {}
+    return null;
+  });
 
   // Rascunho: lista preparada mas ainda nao foi para o mercado
   const temRascunho = selecionados.length > 0;
@@ -1859,6 +1837,12 @@ export default function App() {
     setSelecionados(novosSelecionados);
     setTela("comprando");
   };
+  // Processar lista recebida via link do WhatsApp
+  useEffect(() => {
+    if (listaRecebida) importarLista(listaRecebida);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const irLocalizarPrecos = () => setTela("localizando");
   const irComprar         = () => setTela("comprando");
   const voltarBase        = () => setTela("base");
@@ -1903,7 +1887,7 @@ export default function App() {
     setSelecionados([]);
   };
 
-  if(tela==="home")        return <TelaHome            itens={itens} historico={historico} temRascunho={temRascunho} selecionados={selecionados} onIrListaBase={()=>setTela("base")} onIrPreparar={()=>irParaPreparar(false)} onIrComprar={irLocalizarPrecos} onIrHistorico={()=>setTela("historico")} onIrLocalizacao={()=>setTela("localizando")} onImportarLista={importarLista} />;
+  if(tela==="home")        return <TelaHome            itens={itens} historico={historico} temRascunho={temRascunho} selecionados={selecionados} onIrListaBase={()=>setTela("base")} onIrPreparar={()=>irParaPreparar(false)} onIrComprar={irLocalizarPrecos} onIrHistorico={()=>setTela("historico")} onIrLocalizacao={()=>setTela("localizando")} />;
   if(tela==="base")        return <TelaListaBase        itens={itens} setItens={setItens} onIrParaPreparar={irParaPreparar} onVerHistorico={()=>setTela("historico")} historico={historico} temRascunho={temRascunho} onVoltar={voltarHome} />;
   if(tela==="preparar")    return <TelaPreparar          itens={itens} setItens={setItens} selecionados={selecionados} setSelecionados={setSelecionados} onVoltar={voltarHome} onIrComprar={irLocalizarPrecos} />;
   if(tela==="localizando") return <TelaSupermercados     itens={itens} selecionados={selecionados} onPular={irComprar} onVoltar={()=>setTela("home")} />;
