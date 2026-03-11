@@ -1028,7 +1028,7 @@ function TelaSupermercados({ itens, selecionados, onEscolherSupermercado, onVolt
           </div>
         )}
 
-        <button onClick={onPular} style={{ width:"100%", background:"rgba(16,185,129,0.1)", border:"1.5px solid rgba(16,185,129,0.3)", borderRadius:16, padding:"15px", color:"#34d399", fontWeight:800, fontSize:15, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+        <button onClick={()=>onEscolherSupermercado("")} style={{ width:"100%", background:"rgba(16,185,129,0.1)", border:"1.5px solid rgba(16,185,129,0.3)", borderRadius:16, padding:"15px", color:"#34d399", fontWeight:800, fontSize:15, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
           🛒 Pular e ir direto às compras
         </button>
       </div>
@@ -1060,7 +1060,7 @@ function TelaSupermercados({ itens, selecionados, onEscolherSupermercado, onVolt
       <div style={{ background:"rgba(255,255,255,0.04)", backdropFilter:"blur(20px)", borderBottom:"1px solid rgba(255,255,255,0.08)", padding:"14px 20px", position:"sticky", top:0, zIndex:100 }}>
         <div style={{ maxWidth:660, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <button onClick={onVoltar} style={{ background:"rgba(255,255,255,0.07)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, padding:"8px 14px", color:"rgba(255,255,255,0.6)", fontSize:13, fontWeight:700, cursor:"pointer" }}>← Voltar</button>
+            <button onClick={()=>{ setFase("pergunta"); setUsandoManual(false); }} style={{ background:"rgba(255,255,255,0.07)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, padding:"8px 14px", color:"rgba(255,255,255,0.6)", fontSize:13, fontWeight:700, cursor:"pointer" }}>← Voltar</button>
             <div>
               <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:18 }}>🗺️ Escolha o mercado</div>
               <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)", marginTop:1 }}>
