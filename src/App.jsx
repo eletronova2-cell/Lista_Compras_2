@@ -670,14 +670,14 @@ function ModalQtdPreparar({ item, onConfirmar, onCancelar }) {
       <label style={{ fontSize:11,color:"rgba(255,255,255,0.4)",fontWeight:700,textTransform:"uppercase",letterSpacing:.8 }}>
         Quantidade para esta compra
       </label>
-      <div style={{ display:"flex",alignItems:"center",gap:10,marginTop:8,marginBottom:24 }}>
+      <div style={{ display:"flex",alignItems:"center",gap:8,marginTop:8,marginBottom:24 }}>
         <button onClick={()=>setQtd(v=>String(Math.max(0.5,(parseFloat(v)||1)-0.5)))}
-          style={{ width:44,height:44,borderRadius:12,border:"1.5px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.08)",color:"#fff",fontSize:22,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0 }}>−</button>
+          style={{ width:40,height:40,borderRadius:10,border:"1.5px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.08)",color:"#fff",fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0 }}>−</button>
         <input type="number" value={qtd} onChange={e=>setQtd(e.target.value)} min="0.5" step="0.5" autoFocus
-          style={{ ...inpStyle({ flex:1,textAlign:"center",fontSize:20,fontWeight:800,padding:"12px 10px" }) }} />
-        <div style={{ fontSize:14,color:"rgba(255,255,255,0.4)",fontWeight:700,minWidth:28,textAlign:"left" }}>{item.unidade}</div>
+          style={{ ...inpStyle({ width:80,textAlign:"center",fontSize:18,fontWeight:800,padding:"10px 6px",flexShrink:0 }) }} />
+        <div style={{ fontSize:13,color:"rgba(255,255,255,0.5)",fontWeight:700,minWidth:24 }}>{item.unidade}</div>
         <button onClick={()=>setQtd(v=>String((parseFloat(v)||0)+0.5))}
-          style={{ width:44,height:44,borderRadius:12,border:"1.5px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.08)",color:"#fff",fontSize:22,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0 }}>+</button>
+          style={{ width:40,height:40,borderRadius:10,border:"1.5px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.08)",color:"#fff",fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0 }}>+</button>
       </div>
 
       <div style={{ display:"flex",gap:10 }}>
@@ -879,7 +879,7 @@ function TelaPreparar({ itens, setItens, selecionados, setSelecionados, onVoltar
 
 
 // ─── TELA 3: Supermercados na Região ────────────────────────────────────────
-function TelaSupermercados({ itens, selecionados, onPular, onVoltar }) {
+function TelaSupermercados({ itens, selecionados, onEscolherSupermercado, onVoltar }) {
   const [fase, setFase]             = useState("pergunta"); // pergunta | localizando | resultado
   const [coords, setCoords]         = useState(null); // {lat, lng}
   const [cidadeManual, setCidadeManual] = useState("");
@@ -921,10 +921,10 @@ function TelaSupermercados({ itens, selecionados, onPular, onVoltar }) {
     setFase("resultado");
   };
 
-  // ── Abrir Maps — busca supermercados físicos somente ───────────────────────
+  // ── Abrir Maps — supermercados num raio de 5km ──────────────────────────────
   const abrirMapsGeral = () => {
-    // "supermercado" filtra fisicamente; evita Mercado Livre e similares
     if (coords) {
+      // nearbySearch zoom 14z ≈ 5km radius, "supermercado" = físico
       window.open(`https://www.google.com/maps/search/supermercado/@${coords.lat},${coords.lng},14z`, "_blank");
     } else {
       window.open(`https://www.google.com/maps/search/supermercado+${encodeURIComponent(localLabel)}`, "_blank");
@@ -933,11 +933,29 @@ function TelaSupermercados({ itens, selecionados, onPular, onVoltar }) {
 
   const abrirMapsRota = (nome) => {
     if (coords) {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(nome+" "+localLabel)}&travelmode=driving`, "_blank");
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${coords.lat},${coords.lng}&destination=${encodeURIComponent(nome)}&travelmode=driving`, "_blank");
     } else {
       window.open(`https://www.google.com/maps/search/${encodeURIComponent(nome+" "+localLabel)}`, "_blank");
     }
   };
+
+  // ── Supermercados de grande porte (sem mercadinhos) ──────────────────────────
+  const REDES = [
+    { nome:"Atacadão",           emoji:"🏬", tipo:"atacadista" },
+    { nome:"Assaí Atacadista",   emoji:"🏬", tipo:"atacadista" },
+    { nome:"Carrefour",          emoji:"🛒", tipo:"hipermercado" },
+    { nome:"Carrefour Bairro",   emoji:"🛒", tipo:"supermercado" },
+    { nome:"Extra",              emoji:"🛒", tipo:"hipermercado" },
+    { nome:"Pão de Açúcar",      emoji:"🛒", tipo:"supermercado" },
+    { nome:"Dia",                emoji:"🏪", tipo:"supermercado" },
+    { nome:"BIG",                emoji:"🛒", tipo:"hipermercado" },
+    { nome:"Comper",             emoji:"🛒", tipo:"supermercado" },
+    { nome:"Condor",             emoji:"🛒", tipo:"supermercado" },
+    { nome:"Fort Atacadista",    emoji:"🏬", tipo:"atacadista" },
+    { nome:"Hiper Bompreço",     emoji:"🛒", tipo:"hipermercado" },
+    { nome:"Sam's Club",         emoji:"🏬", tipo:"atacadista" },
+    { nome:"Makro",              emoji:"🏬", tipo:"atacadista" },
+  ];
 
   const BASE_STYLE = { minHeight:"100vh", background:"linear-gradient(160deg,#0f0c29,#1a1a2e,#16213e)", fontFamily:"'Plus Jakarta Sans',sans-serif", color:"#f0f0f0" };
   const FONTS = <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet" />;
@@ -1038,77 +1056,75 @@ function TelaSupermercados({ itens, selecionados, onPular, onVoltar }) {
       {FONTS}
       <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
-      {/* Header */}
+      {/* Header com botão Voltar */}
       <div style={{ background:"rgba(255,255,255,0.04)", backdropFilter:"blur(20px)", borderBottom:"1px solid rgba(255,255,255,0.08)", padding:"14px 20px", position:"sticky", top:0, zIndex:100 }}>
         <div style={{ maxWidth:660, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-          <div>
-            <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:20 }}>🗺️ Supermercados</div>
-            <div style={{ fontSize:12, color:"rgba(255,255,255,0.4)", marginTop:2 }}>
-              {coords ? "📍 Localização obtida" : `📍 ${localLabel}`}
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <button onClick={onVoltar} style={{ background:"rgba(255,255,255,0.07)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, padding:"8px 14px", color:"rgba(255,255,255,0.6)", fontSize:13, fontWeight:700, cursor:"pointer" }}>← Voltar</button>
+            <div>
+              <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:18 }}>🗺️ Escolha o mercado</div>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)", marginTop:1 }}>
+                {coords ? `📍 Raio de 5km · ${localLabel}` : `📍 ${localLabel}`}
+              </div>
             </div>
           </div>
-          <button onClick={onPular} style={{ background:"linear-gradient(135deg,#10B981,#059669)", border:"none", borderRadius:12, padding:"11px 18px", color:"#fff", fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-            🛒 Ir comprar
+          <button onClick={abrirMapsGeral} style={{ background:"rgba(99,102,241,0.15)", border:"1px solid rgba(99,102,241,0.3)", borderRadius:10, padding:"8px 12px", color:"#a5b4fc", fontSize:12, fontWeight:700, cursor:"pointer" }}>
+            🗺️ Maps
           </button>
         </div>
       </div>
 
-      <div style={{ maxWidth:660, margin:"0 auto", padding:"20px 16px" }}>
+      <div style={{ maxWidth:660, margin:"0 auto", padding:"16px 16px" }}>
 
         {/* Resumo da lista */}
-        <div style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:"12px 18px", marginBottom:16, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:"10px 16px", marginBottom:14, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)" }}>
-            📋 <strong style={{ color:"#fff" }}>{itensCompra.length} itens</strong> na sua lista
+            📋 <strong style={{ color:"#fff" }}>{itensCompra.length} itens</strong> · {totalEstimado>0?`Est. R$ ${totalEstimado.toFixed(2)}`:"sem preços cadastrados"}
           </div>
-          {totalEstimado > 0 && (
-            <div style={{ textAlign:"right" }}>
-              <div style={{ fontSize:10, color:"rgba(255,255,255,0.35)", fontWeight:700, textTransform:"uppercase" }}>Estimado</div>
-              <div style={{ fontSize:17, fontWeight:900, fontFamily:"'Plus Jakarta Sans',sans-serif", color:"#a5b4fc" }}>R$ {totalEstimado.toFixed(2)}</div>
-            </div>
-          )}
         </div>
 
-        {/* Botão principal — todos os supermercados próximos */}
-        <button onClick={abrirMapsGeral}
-          style={{ width:"100%", background:"linear-gradient(135deg,#6366f1,#8B5CF6)", border:"none", borderRadius:16, padding:"18px", color:"#fff", fontWeight:900, fontSize:16, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", boxShadow:"0 8px 32px rgba(99,102,241,0.35)", marginBottom:12, display:"flex", alignItems:"center", justifyContent:"center", gap:10, animation:"fadeIn 0.2s ease" }}>
-          <span style={{ fontSize:22 }}>🗺️</span> Ver supermercados no Google Maps
-        </button>
-
-        {/* Dica */}
-        <div style={{ background:"rgba(99,102,241,0.08)", border:"1px solid rgba(99,102,241,0.2)", borderRadius:12, padding:"10px 14px", marginBottom:20, fontSize:12, color:"#a5b4fc", lineHeight:1.6 }}>
-          💡 O Maps abre apenas supermercados físicos na sua cidade. Toque em qualquer um para ver rotas, horários e avaliações.
+        <div style={{ fontSize:11, fontWeight:800, color:"rgba(255,255,255,0.35)", textTransform:"uppercase", letterSpacing:.8, marginBottom:10 }}>
+          Toque para escolher onde vai comprar
         </div>
 
-        {/* 7 supermercados físicos típicos por busca individual */}
-        <div style={{ fontSize:11, fontWeight:800, color:"rgba(255,255,255,0.3)", textTransform:"uppercase", letterSpacing:.8, marginBottom:12 }}>
-          Buscar supermercado específico em {localLabel||"sua cidade"}
-        </div>
-        {[
-          { nome:"Atacadão",          emoji:"🏬" },
-          { nome:"Assaí Atacadista",  emoji:"🏬" },
-          { nome:"Carrefour",         emoji:"🛒" },
-          { nome:"Extra",             emoji:"🛒" },
-          { nome:"Pão de Açúcar",     emoji:"🛒" },
-          { nome:"Dia Supermercado",  emoji:"🏪" },
-          { nome:"Mercado municipal", emoji:"🏪" },
-        ].map((m, i) => (
-          <div key={i} onClick={() => abrirMapsRota(m.nome)}
-            style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:"14px 16px", marginBottom:10, display:"flex", alignItems:"center", gap:12, cursor:"pointer", animation:`fadeIn ${0.15+i*0.05}s ease` }}
-            onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.07)"}
+        {/* Lista de redes — clique escolhe o supermercado */}
+        {REDES.map((m, i) => (
+          <div key={i}
+            onClick={() => onEscolherSupermercado(m.nome)}
+            style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:"13px 16px", marginBottom:8, display:"flex", alignItems:"center", gap:12, cursor:"pointer", animation:`fadeIn ${0.1+i*0.04}s ease` }}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.08)"}
             onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.04)"}>
-            <div style={{ width:38, height:38, borderRadius:10, background:"rgba(99,102,241,0.18)", border:"1.5px solid rgba(99,102,241,0.28)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>{m.emoji}</div>
+            <div style={{ width:40, height:40, borderRadius:12, background:"rgba(99,102,241,0.15)", border:"1.5px solid rgba(99,102,241,0.25)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0 }}>{m.emoji}</div>
             <div style={{ flex:1 }}>
               <div style={{ fontWeight:800, fontSize:14, color:"#fff" }}>{m.nome}</div>
-              <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)", marginTop:2 }}>Buscar unidade em {localLabel||"sua cidade"}</div>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.35)", marginTop:2, textTransform:"capitalize" }}>{m.tipo}</div>
             </div>
-            <div style={{ fontSize:18, color:"rgba(99,102,241,0.7)", flexShrink:0 }}>→</div>
+            <div style={{ display:"flex", gap:8 }}>
+              <button onClick={e=>{e.stopPropagation();abrirMapsRota(m.nome);}} style={{ background:"rgba(99,102,241,0.12)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:8,padding:"6px 10px",color:"#a5b4fc",fontSize:11,fontWeight:700,cursor:"pointer" }}>
+                📍 Rota
+              </button>
+              <div style={{ fontSize:18, color:"rgba(16,185,129,0.6)", display:"flex", alignItems:"center" }}>→</div>
+            </div>
           </div>
         ))}
 
+        {/* Digitar outro */}
+        <div style={{ marginTop:12, marginBottom:8 }}>
+          <div style={{ fontSize:11, color:"rgba(255,255,255,0.35)", fontWeight:700, marginBottom:8 }}>Outro supermercado:</div>
+          <div style={{ display:"flex", gap:8 }}>
+            <input type="text" value={cidadeManual} onChange={e=>setCidadeManual(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&cidadeManual.trim()&&onEscolherSupermercado(cidadeManual.trim())}
+              placeholder="Digite o nome do supermercado..."
+              style={{ flex:1, background:"rgba(255,255,255,0.06)", border:"1.5px solid rgba(255,255,255,0.12)", borderRadius:12, padding:"12px 14px", color:"#fff", fontSize:13, fontFamily:"'Plus Jakarta Sans',sans-serif", outline:"none" }} />
+            <button onClick={()=>cidadeManual.trim()&&onEscolherSupermercado(cidadeManual.trim())}
+              style={{ background:"linear-gradient(135deg,#10B981,#059669)", border:"none", borderRadius:12, padding:"12px 18px", color:"#fff", fontWeight:800, fontSize:14, cursor:"pointer" }}>→</button>
+          </div>
+        </div>
+
         {/* Buscar em outro local */}
-        <button onClick={() => { setFase("pergunta"); setUsandoManual(true); setCidadeManual(""); }}
-          style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, padding:"13px", color:"rgba(255,255,255,0.4)", fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-          🔍 Buscar em outro bairro ou cidade
+        <button onClick={() => { setFase("pergunta"); setUsandoManual(false); setCidadeManual(""); }}
+          style={{ width:"100%", marginTop:8, background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, padding:"12px", color:"rgba(255,255,255,0.35)", fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+          🔄 Usar localização diferente
         </button>
         <div style={{ height:40 }} />
       </div>
@@ -1119,10 +1135,11 @@ function TelaSupermercados({ itens, selecionados, onPular, onVoltar }) {
 }
 
 // ─── TELA 3: Comprando ────────────────────────────────────────────────────────
-function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar }) {
+function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar, supermercado }) {
   const [itemConfirmando, setItemConfirmando] = useState(null);
   const [busca,  setBusca]  = useState("");
   const [filtroCat, setFiltroCat] = useState("todas");
+  const [confirmarEncerrar, setConfirmarEncerrar] = useState(false);
 
   // Apenas itens selecionados na preparação
   const itensCompra = useMemo(()=>itens.filter(i=>selecionados.includes(i.id)),[itens,selecionados]);
@@ -1164,6 +1181,40 @@ function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar }) 
       <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
       {itemConfirmando&&<ModalConfirmacao item={itemConfirmando} onConfirmar={d=>confirmar(itemConfirmando.id,d)} onCancelar={()=>setItemConfirmando(null)} />}
 
+      {/* Modal confirmação de encerrar */}
+      {confirmarEncerrar&&(
+        <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:20 }}>
+          <div style={{ background:"#1a1a2e",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:28,width:"100%",maxWidth:380 }}>
+            <div style={{ fontSize:36,textAlign:"center",marginBottom:12 }}>🛒</div>
+            <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:18,marginBottom:8,textAlign:"center" }}>
+              Encerrar compra{supermercado?` no ${supermercado}`:""}?
+            </div>
+            <div style={{ fontSize:13,color:"rgba(255,255,255,0.5)",lineHeight:1.7,marginBottom:6,textAlign:"center" }}>
+              {marcados.length} de {itensCompra.length} itens confirmados
+            </div>
+            {marcados.length < itensCompra.length&&(
+              <div style={{ fontSize:12,color:"#fbbf24",background:"rgba(251,191,36,0.08)",border:"1px solid rgba(251,191,36,0.2)",borderRadius:10,padding:"8px 12px",marginBottom:16,textAlign:"center" }}>
+                ⚠️ {itensCompra.length-marcados.length} {itensCompra.length-marcados.length===1?"item não confirmado":"itens não confirmados"}. Itens não confirmados não entrarão no total.
+              </div>
+            )}
+            <div style={{ background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"12px 16px",marginBottom:20 }}>
+              <div style={{ display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:6 }}>
+                <span style={{ color:"rgba(255,255,255,0.5)" }}>Total a pagar:</span>
+                <span style={{ fontWeight:800,color:"#fff",fontSize:16 }}>R$ {totalCarrinho.toFixed(2)}</span>
+              </div>
+              {totalEstimado>0&&<div style={{ display:"flex",justifyContent:"space-between",fontSize:12 }}>
+                <span style={{ color:"rgba(255,255,255,0.35)" }}>Estimado:</span>
+                <span style={{ color:"rgba(255,255,255,0.45)" }}>R$ {totalEstimado.toFixed(2)}</span>
+              </div>}
+            </div>
+            <div style={{ display:"flex",gap:10 }}>
+              <button onClick={()=>setConfirmarEncerrar(false)} style={{ flex:1,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:12,padding:"13px",color:"rgba(255,255,255,0.6)",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Continuar</button>
+              <button onClick={()=>{ setConfirmarEncerrar(false); onEncerrar({estimado:totalEstimado,pago:totalCarrinho,itensCont:marcados.length}); }} style={{ flex:1,background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:12,padding:"13px",color:"#fff",fontWeight:800,fontSize:14,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>✓ Encerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ background:"rgba(255,255,255,0.04)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(255,255,255,0.08)",padding:"16px 20px",position:"sticky",top:0,zIndex:100 }}>
         <div style={{ maxWidth:660,margin:"0 auto" }}>
@@ -1171,15 +1222,14 @@ function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar }) 
             <div style={{ display:"flex",alignItems:"center",gap:12 }}>
               <button onClick={onVoltar} style={{ background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 12px",color:"rgba(255,255,255,0.7)",fontSize:13,fontWeight:700,cursor:"pointer" }}>← Voltar</button>
               <div>
-                <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:20 }}>🏪 Comprando</div>
-                <div style={{ fontSize:12,color:"rgba(255,255,255,0.4)",marginTop:2 }}>{marcados.length} de {itensCompra.length} itens</div>
+                <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:20 }}>🏪 {supermercado||"Comprando"}</div>
+                <div style={{ fontSize:12,color:"rgba(255,255,255,0.4)",marginTop:2 }}>{marcados.length} de {itensCompra.length} itens confirmados</div>
               </div>
             </div>
-            {progresso===100&&(
-              <button onClick={()=>onEncerrar({estimado:totalEstimado,pago:totalCarrinho,itensCont:marcados.length})} style={{ background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:12,padding:"10px 16px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                ✓ Encerrar
-              </button>
-            )}
+            <button onClick={()=>setConfirmarEncerrar(true)} disabled={marcados.length===0}
+              style={{ background:marcados.length>0?"linear-gradient(135deg,#10B981,#059669)":"rgba(255,255,255,0.06)",border:"none",borderRadius:12,padding:"10px 16px",color:marcados.length>0?"#fff":"rgba(255,255,255,0.25)",fontWeight:800,fontSize:12,cursor:marcados.length>0?"pointer":"not-allowed",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+              {progresso===100?"✓ Encerrar":"Encerrar aqui"}
+            </button>
           </div>
 
           {/* Barra progresso */}
@@ -1358,7 +1408,7 @@ const labelSemana = (iso) => {
 };
 
 // ─── TELA: Resumo pós-compra ──────────────────────────────────────────────────
-function TelaResumoCompra({ registro, onVerHistorico, onVoltar }) {
+function TelaResumoCompra({ registro, onVerHistorico, onVoltar, onContinuarCompra }) {
   if (!registro) { onVoltar(); return null; }
   const eco     = registro.economia;
   const positivo = eco >= 0;
@@ -1377,9 +1427,14 @@ function TelaResumoCompra({ registro, onVerHistorico, onVoltar }) {
       <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:26, marginBottom:6, textAlign:"center", animation:"fadeUp 0.4s 0.1s both" }}>
         Compra finalizada!
       </div>
-      <div style={{ fontSize:14, color:"rgba(255,255,255,0.45)", marginBottom:32, textAlign:"center", animation:"fadeUp 0.4s 0.15s both" }}>
+      <div style={{ fontSize:14, color:"rgba(255,255,255,0.45)", marginBottom:registro.supermercado?6:32, textAlign:"center", animation:"fadeUp 0.4s 0.15s both" }}>
         {fmtData(registro.data)} às {fmtHora(registro.data)} · {registro.itensCont} itens
       </div>
+      {registro.supermercado&&(
+        <div style={{ fontSize:13,color:"#a5b4fc",fontWeight:700,marginBottom:32,textAlign:"center",animation:"fadeUp 0.4s 0.18s both" }}>
+          🏪 {registro.supermercado}
+        </div>
+      )}
 
       {/* Card principal */}
       <div style={{ width:"100%", maxWidth:400, background:"rgba(255,255,255,0.05)", border:`1.5px solid ${positivo?"rgba(16,185,129,0.35)":"rgba(239,68,68,0.3)"}`, borderRadius:24, overflow:"hidden", marginBottom:20, animation:"fadeUp 0.4s 0.2s both" }}>
@@ -1418,6 +1473,11 @@ function TelaResumoCompra({ registro, onVerHistorico, onVoltar }) {
 
       {/* Botões */}
       <div style={{ width:"100%", maxWidth:400, display:"flex", flexDirection:"column", gap:10, animation:"fadeUp 0.4s 0.3s both" }}>
+        {onContinuarCompra&&(
+          <button onClick={onContinuarCompra} style={{ width:"100%", background:"linear-gradient(135deg,#10B981,#059669)", border:"none", borderRadius:16, padding:"16px", color:"#fff", fontWeight:900, fontSize:15, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
+            🏪 Continuar em outro mercado
+          </button>
+        )}
         <button onClick={onVerHistorico} style={{ width:"100%", background:"linear-gradient(135deg,#6366f1,#8B5CF6)", border:"none", borderRadius:16, padding:"16px", color:"#fff", fontWeight:900, fontSize:15, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
           📊 Ver histórico e gráficos
         </button>
@@ -1514,6 +1574,7 @@ function TelaHistorico({ historico, onVoltar, onZerarHistorico }) {
             <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:18,marginBottom:4 }}>
               🛒 Compra de {new Date(registroDetalhe.data).toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"})}
             </div>
+            {registroDetalhe.supermercado&&<div style={{ fontSize:13,color:"#a5b4fc",fontWeight:700,marginBottom:6 }}>🏪 {registroDetalhe.supermercado}</div>}
             <div style={{ fontSize:12,color:"rgba(255,255,255,0.4)",marginBottom:20 }}>
               {registroDetalhe.itensCont} itens · Pago R$ {registroDetalhe.pago.toFixed(2)} · {registroDetalhe.economia>=0?"Economia":"Prejuízo"} R$ {Math.abs(registroDetalhe.economia).toFixed(2)}
             </div>
@@ -1692,6 +1753,7 @@ function TelaHistorico({ historico, onVoltar, onZerarHistorico }) {
                   onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.04)"}>
                   <div>
                     <div style={{ fontSize:13, fontWeight:800, color:"#fff", marginBottom:3 }}>{fmtData(r.data)}</div>
+                    {r.supermercado&&<div style={{ fontSize:11, color:"#a5b4fc", fontWeight:700, marginBottom:2 }}>🏪 {r.supermercado}</div>}
                     <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)" }}>{fmtHora(r.data)} · {r.itensCont} itens · est. R$ {r.estimado.toFixed(2)}</div>
                     {temItens && <div style={{ fontSize:10, color:"rgba(99,102,241,0.7)", marginTop:3, fontWeight:700 }}>📋 Ver itens →</div>}
                   </div>
@@ -1775,6 +1837,7 @@ export default function App() {
 
   const [tela, setTela] = useState("home");
   const [registroAtual, setRegistroAtual] = useState(null);
+  const [supermercadoAtual, setSupermercadoAtual] = useState("");
   const [listaRecebida, setListaRecebida] = useState(() => {
     // Lê o hash da URL na inicialização (#lista=BASE64)
     try {
@@ -1844,6 +1907,7 @@ export default function App() {
   }, []);
 
   const irLocalizarPrecos = () => setTela("localizando");
+  const escolherSupermercado = (nome) => { setSupermercadoAtual(nome); setTela("comprando"); };
   const irComprar         = () => setTela("comprando");
   const voltarBase        = () => setTela("base");
   const voltarHome        = () => setTela("home");
@@ -1870,6 +1934,7 @@ export default function App() {
         itensCont: totais.itensCont,
         economia:  totais.estimado - totais.pago,
         itens:     itensComprados,
+        supermercado: supermercadoAtual || "",
       };
       setRegistroAtual(registro);
       // Manter apenas últimos 12 meses e no máximo 200 registros
@@ -1879,19 +1944,26 @@ export default function App() {
         const filtrado = prev.filter(r => new Date(r.data) >= limite);
         return [...filtrado, registro].slice(-200);
       });
+      // Remove apenas os itens que foram marcados (comprados aqui)
+      // Itens não marcados ficam selecionados para continuar em outro mercado
+      const idsMarcados = itens.filter(i=>selecionados.includes(i.id)&&i.marcado).map(i=>i.id);
+      setItens(prev=>prev.map(i=> idsMarcados.includes(i.id)
+        ? {...i,marcado:false,quantidadeCompra:undefined,precoCompra:undefined}
+        : i
+      ));
+      setSelecionados(prev => prev.filter(id => !idsMarcados.includes(id)));
+      setSupermercadoAtual("");
       setTela("resumo");
     } else {
       setTela("base");
     }
-    setItens(prev=>prev.map(i=>({...i,marcado:false,quantidadeCompra:undefined,precoCompra:undefined})));
-    setSelecionados([]);
   };
 
   if(tela==="home")        return <TelaHome            itens={itens} historico={historico} temRascunho={temRascunho} selecionados={selecionados} onIrListaBase={()=>setTela("base")} onIrPreparar={()=>irParaPreparar(false)} onIrComprar={irLocalizarPrecos} onIrHistorico={()=>setTela("historico")} onIrLocalizacao={()=>setTela("localizando")} />;
   if(tela==="base")        return <TelaListaBase        itens={itens} setItens={setItens} onIrParaPreparar={irParaPreparar} onVerHistorico={()=>setTela("historico")} historico={historico} temRascunho={temRascunho} onVoltar={voltarHome} />;
   if(tela==="preparar")    return <TelaPreparar          itens={itens} setItens={setItens} selecionados={selecionados} setSelecionados={setSelecionados} onVoltar={voltarHome} onIrComprar={irLocalizarPrecos} />;
-  if(tela==="localizando") return <TelaSupermercados     itens={itens} selecionados={selecionados} onPular={irComprar} onVoltar={()=>setTela("home")} />;
-  if(tela==="comprando")   return <TelaComprando         itens={itens} selecionados={selecionados} setItens={setItens} onVoltar={voltarPreparar} onEncerrar={encerrar} />;
-  if(tela==="resumo")      return <TelaResumoCompra      registro={registroAtual} onVerHistorico={()=>setTela("historico")} onVoltar={voltarHome} />;
+  if(tela==="localizando") return <TelaSupermercados     itens={itens} selecionados={selecionados} onEscolherSupermercado={escolherSupermercado} onVoltar={()=>setTela("home")} />;
+  if(tela==="comprando")   return <TelaComprando         itens={itens} selecionados={selecionados} setItens={setItens} onVoltar={voltarPreparar} onEncerrar={encerrar} supermercado={supermercadoAtual} />;
+  if(tela==="resumo")      return <TelaResumoCompra      registro={registroAtual} onVerHistorico={()=>setTela("historico")} onVoltar={voltarHome} onContinuarCompra={selecionados.length>0?()=>setTela("localizando"):null} />;
   if(tela==="historico")   return <TelaHistorico         historico={historico} onVoltar={voltarHome} onZerarHistorico={zerarHistorico} />;
 }
