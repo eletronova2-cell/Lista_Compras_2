@@ -444,6 +444,7 @@ function TelaListaBase({ itens, setItens, onIrParaPreparar, onVerHistorico, hist
   const [mostrarZero, setMostrarZero] = useState(true);
   const [sugestoes,   setSugestoes]   = useState(false);
   const [editando,    setEditando]    = useState(null);
+  const [aba,         setAba]         = useState("itens"); // itens | adicionar
 
   const adicionarItem = (nomeItem) => {
     const nome = (nomeItem||novoItem).trim();
@@ -470,8 +471,6 @@ function TelaListaBase({ itens, setItens, onIrParaPreparar, onVerHistorico, hist
   const totalBase  = itens.filter(i=>i.quantidade>0).reduce((a,i)=>a+(i.preco*i.quantidade),0);
   const sugestoesFilt = (SUGERIDOS[catAtiva]||[]).filter(s=>s.toLowerCase().includes(novoItem.toLowerCase())&&!itens.some(i=>i.nome.toLowerCase()===s.toLowerCase())).slice(0,5);
   const inp = inpStyle();
-
-  const [aba, setAba] = useState("itens"); // itens | adicionar
 
   return (
     <div style={BASE}>
@@ -1851,6 +1850,7 @@ export default function App() {
     setSelecionados(novosSelecionados);
     setTela("comprando");
   };
+  const irLocalizarPrecos = () => setTela("localizando");
   const irComprar         = () => setTela("comprando");
   const voltarBase        = () => setTela("base");
   const voltarHome        = () => setTela("home");
