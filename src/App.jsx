@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 
 // ─── Versão do app ────────────────────────────────────────────────────────────
-const APP_VERSION = "1.0.2 · 110326:2310";
+const APP_VERSION = "1.0.4 · 130326:1620";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 
 const CATEGORIAS = {
@@ -15,85 +15,99 @@ const CATEGORIAS = {
 
 const LISTA_INICIAL = [
   // ── Higiene & Beleza ────────────────────────────────────────────────────────
-  { nome:"Sabonete",          marca:"Palmolive",     modelo:"Framboesa e Amora",          unidade:"g",   quantidade:6,  preco:4.20,  categoria:"higiene"     },
-  { nome:"Creme Dental",      marca:"Colgate",       modelo:"Carvão Ativado",             unidade:"g",   quantidade:1,  preco:12.00, categoria:"higiene"     },
-  { nome:"Aparelho de Barbear",marca:"Gilete",       modelo:"Prestobarba 3",              unidade:"cx",  quantidade:1,  preco:20.00, categoria:"higiene"     },
-  { nome:"Desodorante Masculino",marca:"Old Spice",  modelo:"Amadeirado",                 unidade:"ml",  quantidade:2,  preco:14.00, categoria:"higiene"     },
-  { nome:"Papel Toalha",      marca:"Yuri",          modelo:"Folha Dupla",                unidade:"rolo",quantidade:2,  preco:5.80,  categoria:"higiene"     },
-  { nome:"Papel Higiênico",   marca:"Dueto",         modelo:"Folha Dupla",                unidade:"un",  quantidade:1,  preco:18.00, categoria:"higiene"     },
-  { nome:"Desodorante Feminino",marca:"Suave",       modelo:"Frutas Vermelhas",           unidade:"ml",  quantidade:1,  preco:14.00, categoria:"higiene"     },
-  { nome:"Shampoo Feminino",  marca:"Dove",          modelo:"Kit Shampoo + Condicionador",unidade:"ml",  quantidade:1,  preco:45.00, categoria:"higiene"     },
-  { nome:"Shampoo Masculino", marca:"Seda",          modelo:"Kit Shampoo + Condicionador",unidade:"ml",  quantidade:1,  preco:15.00, categoria:"higiene"     },
-  { nome:"Enxaguante Bucal",  marca:"Listerine",     modelo:"Hortelã",                    unidade:"ml",  quantidade:1,  preco:29.90, categoria:"higiene"     },
-  { nome:"Filtro de Café",    marca:"Mellita",       modelo:"102",                        unidade:"un",  quantidade:1,  preco:5.00,  categoria:"higiene"     },
-  { nome:"Creme Hidratante",  marca:"Paixão",        modelo:"Amêndoas",                   unidade:"ml",  quantidade:0,  preco:12.00, categoria:"higiene"     },
-  { nome:"Desodorante Feminino",marca:"Suave",       modelo:"Invisible",                  unidade:"ml",  quantidade:1,  preco:14.00, categoria:"higiene"     },
-  // ── Limpeza ─────────────────────────────────────────────────────────────────
-  { nome:"Limpador Perfumado",marca:"Veja",          modelo:"Serras Brasileiras",         unidade:"Lt",  quantidade:0,  preco:14.00, categoria:"limpeza"     },
-  { nome:"Esponja de Lavar Louça",marca:"Esfrebom",  modelo:"Multiuso",                   unidade:"un",  quantidade:0,  preco:4.00,  categoria:"limpeza"     },
-  { nome:"Detergente Louça",  marca:"Ypê",           modelo:"Fragâncias",                 unidade:"ml",  quantidade:6,  preco:2.60,  categoria:"limpeza"     },
-  { nome:"Sabão Líquido",     marca:"Tixan",         modelo:"Primavera",                  unidade:"Lt",  quantidade:1,  preco:30.00, categoria:"limpeza"     },
-  { nome:"Amaciante",         marca:"Downy",         modelo:"Brisa Intenso",              unidade:"ml",  quantidade:2,  preco:21.00, categoria:"limpeza"     },
-  { nome:"Cloro",             marca:"Candura",       modelo:"Candura",                    unidade:"Lt",  quantidade:1,  preco:13.50, categoria:"limpeza"     },
-  { nome:"Refil Inseticida",  marca:"SBP",           modelo:"Cheiro Suave - Kit c/3",     unidade:"ml",  quantidade:1,  preco:25.00, categoria:"limpeza"     },
-  // ── Alimentação ─────────────────────────────────────────────────────────────
-  { nome:"Leite",             marca:"Italac",        modelo:"Zero Lactose",               unidade:"Lt",  quantidade:12, preco:4.50,  categoria:"alimentacao" },
-  { nome:"Molho de Tomate",   marca:"Tomodoro",      modelo:"Tradicional",                unidade:"g",   quantidade:12, preco:1.10,  categoria:"alimentacao" },
-  { nome:"Açúcar",            marca:"União",         modelo:"Refinado",                   unidade:"kg",  quantidade:8,  preco:3.50,  categoria:"alimentacao" },
-  { nome:"Tempero",           marca:"Sazon",         modelo:"Sabores",                    unidade:"gr",  quantidade:6,  preco:5.00,  categoria:"alimentacao" },
-  { nome:"Feijão",            marca:"Nenê",          modelo:"Carioca",                    unidade:"kg",  quantidade:2,  preco:6.50,  categoria:"alimentacao" },
-  { nome:"Sardinha",          marca:"Gomes da Costa",modelo:"Óleo",                       unidade:"gr",  quantidade:4,  preco:5.60,  categoria:"alimentacao" },
-  { nome:"Ovo",               marca:"Ovo",           modelo:"C/ 60 unidades",             unidade:"cx",  quantidade:2,  preco:17.00, categoria:"alimentacao" },
-  { nome:"Leite Condensado",  marca:"Italac",        modelo:"Integral",                   unidade:"g",   quantidade:4,  preco:4.60,  categoria:"alimentacao" },
-  { nome:"Arroz",             marca:"Raroz",         modelo:"Tipo 1",                     unidade:"kg",  quantidade:2,  preco:12.50, categoria:"alimentacao" },
-  { nome:"Farinha de Trigo",  marca:"Dona Benta",    modelo:"Tradicional",                unidade:"kg",  quantidade:1,  preco:5.00,  categoria:"alimentacao" },
-  { nome:"Café",              marca:"Pilão",         modelo:"Tradicional",                unidade:"g",   quantidade:0,  preco:35.00, categoria:"alimentacao" },
-  { nome:"Amido de Milho",    marca:"Maizena",       modelo:"Maizena",                    unidade:"g",   quantidade:0,  preco:7.00,  categoria:"alimentacao" },
-  { nome:"Gelatina",          marca:"Dr. Oetker",    modelo:"Sabores",                    unidade:"g",   quantidade:0,  preco:2.00,  categoria:"alimentacao" },
-  { nome:"Achocolatado",      marca:"Toddy",         modelo:"Original",                   unidade:"kg",  quantidade:1,  preco:17.90, categoria:"alimentacao" },
-  { nome:"Iogurte",           marca:"Danone",        modelo:"Sabores",                    unidade:"lt",  quantidade:3,  preco:12.00, categoria:"alimentacao" },
-  { nome:"Farofa Mandioca",   marca:"Yoki",          modelo:"Temperada",                  unidade:"g",   quantidade:1,  preco:6.50,  categoria:"alimentacao" },
-  { nome:"Sal",               marca:"Lebre",         modelo:"Refinado",                   unidade:"kg",  quantidade:1,  preco:3.00,  categoria:"alimentacao" },
-  // ── Lanches & Bebidas ───────────────────────────────────────────────────────
-  { nome:"Chá Matte",         marca:"Matte",         modelo:"Tradicional",                unidade:"gr",  quantidade:1,  preco:14.00, categoria:"lanches"     },
-  // ── Carnes & Peixes ─────────────────────────────────────────────────────────
-  { nome:"Filé de Frango",    marca:"",              modelo:"",                           unidade:"kg",  quantidade:3,  preco:60.00, categoria:"carnes"      },
-  { nome:"Cordão Mignon",     marca:"",              modelo:"",                           unidade:"kg",  quantidade:1,  preco:27.00, categoria:"carnes"      },
-  { nome:"Carne Moída",       marca:"",              modelo:"",                           unidade:"kg",  quantidade:2,  preco:27.00, categoria:"carnes"      },
-  { nome:"Coxão Mole",        marca:"",              modelo:"",                           unidade:"kg",  quantidade:2,  preco:35.00, categoria:"carnes"      },
-  { nome:"Ponta de Alcatra",  marca:"",              modelo:"",                           unidade:"kg",  quantidade:2,  preco:35.00, categoria:"carnes"      },
-  { nome:"Costela de Porco",  marca:"",              modelo:"",                           unidade:"kg",  quantidade:2,  preco:17.00, categoria:"carnes"      },
-  { nome:"Peixe Tilápia",     marca:"",              modelo:"",                           unidade:"kg",  quantidade:2,  preco:40.00, categoria:"carnes"      },
-  { nome:"Batata Frita",      marca:"",              modelo:"",                           unidade:"kg",  quantidade:1,  preco:26.00, categoria:"carnes"      },
-  // ── Frutas & Verduras ────────────────────────────────────────────────────────
-  { nome:"Limão",             marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:3.90,  categoria:"frutas"      },
-  { nome:"Abacate",           marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:5.70,  categoria:"frutas"      },
-  { nome:"Maçã",              marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:8.00,  categoria:"frutas"      },
-  { nome:"Laranja",           marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:3.90,  categoria:"frutas"      },
-  { nome:"Banana",            marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:5.00,  categoria:"frutas"      },
-  { nome:"Repolho",           marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:5.00,  categoria:"frutas"      },
-  { nome:"Tomate",            marca:"",              modelo:"",                           unidade:"un",  quantidade:3,  preco:7.00,  categoria:"frutas"      },
-  { nome:"Batata",            marca:"",              modelo:"",                           unidade:"un",  quantidade:6,  preco:4.00,  categoria:"frutas"      },
-  { nome:"Abóbora",           marca:"",              modelo:"",                           unidade:"un",  quantidade:2,  preco:7.00,  categoria:"frutas"      },
-  { nome:"Batata Doce",       marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:4.00,  categoria:"frutas"      },
-  { nome:"Cebola",            marca:"",              modelo:"",                           unidade:"un",  quantidade:2,  preco:4.00,  categoria:"frutas"      },
-  { nome:"Pimentão",          marca:"",              modelo:"",                           unidade:"un",  quantidade:2,  preco:6.00,  categoria:"frutas"      },
-  { nome:"Abobrinha",         marca:"",              modelo:"",                           unidade:"un",  quantidade:2,  preco:4.00,  categoria:"frutas"      },
-  { nome:"Mandioca",          marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:6.00,  categoria:"frutas"      },
-  { nome:"Quiabo",            marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:9.00,  categoria:"frutas"      },
-  { nome:"Mexirica",          marca:"",              modelo:"",                           unidade:"un",  quantidade:1,  preco:4.00,  categoria:"frutas"      },
+  { nome:"Sabonete",               marca:"Palmolive",   modelo:"Framboesa e Amora",          unidade:"un",  quantidade:1,  preco:4.20,  categoria:"higiene" },
+  { nome:"Creme Dental",           marca:"Colgate",     modelo:"Carvão Ativado",             unidade:"un",  quantidade:1,  preco:7.00,  categoria:"higiene" },
+  { nome:"Aparelho de Barbear",    marca:"Gillette",    modelo:"Prestobarba 3",              unidade:"cx",  quantidade:1,  preco:20.00, categoria:"higiene" },
+  { nome:"Desodorante Masc.",      marca:"Old Spice",   modelo:"Amadeirado",                 unidade:"un",  quantidade:1,  preco:14.00, categoria:"higiene" },
+  { nome:"Papel Higiênico",        marca:"Dueto",       modelo:"Folha Dupla 16 rolos",       unidade:"pct", quantidade:1,  preco:25.00, categoria:"higiene" },
+  { nome:"Desodorante Fem. (R)",   marca:"Suave",       modelo:"Frutas Vermelhas",           unidade:"un",  quantidade:1,  preco:14.00, categoria:"higiene" },
+  { nome:"Shampoo Fem.",           marca:"Dove",        modelo:"Kit Shamp + Cond",           unidade:"kit", quantidade:1,  preco:18.00, categoria:"higiene" },
+  { nome:"Shampoo Masc.",          marca:"Seda",        modelo:"Kit Shamp + Cond",           unidade:"kit", quantidade:1,  preco:15.00, categoria:"higiene" },
+  { nome:"Enxaguante Bucal",       marca:"Listerine",   modelo:"Hortelã",                    unidade:"ml",  quantidade:500,preco:29.90, categoria:"higiene" },
+  { nome:"Desodorante Fem. (F)",   marca:"Suave",       modelo:"Invisible",                  unidade:"un",  quantidade:1,  preco:14.00, categoria:"higiene" },
+  { nome:"Creme de Cabelo",        marca:"Nature",      modelo:"",                           unidade:"kg",  quantidade:1,  preco:18.00, categoria:"higiene" },
+  { nome:"Talco Antisséptico",     marca:"Granado",     modelo:"Tradicional",                unidade:"g",   quantidade:100,preco:8.00,  categoria:"higiene" },
+  { nome:"Creme Corporal",         marca:"Paixão",      modelo:"Lavanda",                    unidade:"ml",  quantidade:500,preco:17.00, categoria:"higiene" },
+  { nome:"Acetona",                marca:"Tradicional", modelo:"",                           unidade:"ml",  quantidade:100,preco:10.00, categoria:"higiene" },
+  { nome:"Leite de Rosas",         marca:"L. de Rosas", modelo:"Tradicional",                unidade:"ml",  quantidade:500,preco:8.00,  categoria:"higiene" },
+
+  // ── Limpeza ──────────────────────────────────────────────────────────────────
+  { nome:"Papel Toalha",           marca:"Coquetel",    modelo:"Folha Dupla",                unidade:"rolo",quantidade:2,  preco:6.00,  categoria:"limpeza" },
+  { nome:"Detergente Louça",       marca:"Ypê",         modelo:"Fragrâncias",                unidade:"ml",  quantidade:500,preco:2.60,  categoria:"limpeza" },
+  { nome:"Sabão Líquido",          marca:"Tixan",       modelo:"Primavera",                  unidade:"L",   quantidade:5,  preco:55.00, categoria:"limpeza" },
+  { nome:"Amaciante",              marca:"Fofo",        modelo:"Brisa Intenso",              unidade:"L",   quantidade:1.5,preco:21.00, categoria:"limpeza" },
+  { nome:"Cloro",                  marca:"Candura",     modelo:"",                           unidade:"L",   quantidade:5,  preco:13.50, categoria:"limpeza" },
+  { nome:"Refil Inseticida",       marca:"Raid",        modelo:"Sem Cheiro Kit 3",           unidade:"kit", quantidade:1,  preco:25.00, categoria:"limpeza" },
+  { nome:"Saco de Lixo",          marca:"",            modelo:"60 Litros",                  unidade:"pct", quantidade:1,  preco:20.00, categoria:"limpeza" },
+  { nome:"Inseticida",             marca:"Raid",        modelo:"Mata Bat./Form.",             unidade:"ml",  quantidade:300,preco:17.00, categoria:"limpeza" },
+  { nome:"Bom Ar Refil",           marca:"Air Wick",    modelo:"Lavanda",                    unidade:"un",  quantidade:1,  preco:24.00, categoria:"limpeza" },
+  { nome:"Álcool",                 marca:"Cooper",      modelo:"Tradicional",                unidade:"L",   quantidade:1,  preco:8.00,  categoria:"limpeza" },
+  { nome:"Lustra Móveis",          marca:"Destac",      modelo:"Lavanda",                    unidade:"ml",  quantidade:200,preco:8.00,  categoria:"limpeza" },
+
+  // ── Alimentação (Despensa) ────────────────────────────────────────────────────
+  { nome:"Filtro de Café",         marca:"Melitta",     modelo:"102",                        unidade:"un",  quantidade:1,  preco:5.00,  categoria:"alimentacao" },
+  { nome:"Leite",                  marca:"Italac",      modelo:"Zero Lactose",               unidade:"L",   quantidade:1,  preco:4.50,  categoria:"alimentacao" },
+  { nome:"Molho de Tomate",        marca:"Tomodoro",    modelo:"Tradicional",                unidade:"un",  quantidade:1,  preco:1.10,  categoria:"alimentacao" },
+  { nome:"Açúcar",                 marca:"União",       modelo:"Refinado",                   unidade:"kg",  quantidade:1,  preco:3.50,  categoria:"alimentacao" },
+  { nome:"Tempero",                marca:"Sazón",       modelo:"Sabores",                    unidade:"un",  quantidade:1,  preco:5.00,  categoria:"alimentacao" },
+  { nome:"Feijão",                 marca:"Nenê",        modelo:"Carioca",                    unidade:"kg",  quantidade:1,  preco:6.50,  categoria:"alimentacao" },
+  { nome:"Sardinha",               marca:"G. da Costa", modelo:"Óleo",                       unidade:"un",  quantidade:1,  preco:5.60,  categoria:"alimentacao" },
+  { nome:"Ovo",                    marca:"",            modelo:"Branco/Verm.",               unidade:"un",  quantidade:60, preco:17.00, categoria:"alimentacao" },
+  { nome:"Leite Condensado",       marca:"Italac",      modelo:"Integral",                   unidade:"un",  quantidade:1,  preco:4.60,  categoria:"alimentacao" },
+  { nome:"Arroz",                  marca:"Raroz",       modelo:"Tipo 1",                     unidade:"kg",  quantidade:1,  preco:12.50, categoria:"alimentacao" },
+  { nome:"Farinha de Trigo",       marca:"Dona Benta",  modelo:"Tradicional",                unidade:"kg",  quantidade:1,  preco:5.00,  categoria:"alimentacao" },
+  { nome:"Achocolatado",           marca:"Toddy",       modelo:"Original",                   unidade:"kg",  quantidade:1,  preco:32.00, categoria:"alimentacao" },
+  { nome:"Iogurte",                marca:"Danone",      modelo:"Sabores",                    unidade:"L",   quantidade:1,  preco:12.00, categoria:"alimentacao" },
+  { nome:"Farofa Mandioca",        marca:"Yoki",        modelo:"Temperada",                  unidade:"un",  quantidade:1,  preco:6.50,  categoria:"alimentacao" },
+  { nome:"Sal",                    marca:"Lebre",       modelo:"Refinado",                   unidade:"kg",  quantidade:1,  preco:3.00,  categoria:"alimentacao" },
+  { nome:"Macarrão Espaguete",     marca:"",            modelo:"",                           unidade:"g",   quantidade:500,preco:3.50,  categoria:"alimentacao" },
+  { nome:"Macarrão Parafuso",      marca:"",            modelo:"",                           unidade:"g",   quantidade:500,preco:3.50,  categoria:"alimentacao" },
+  { nome:"Óleo de Soja",           marca:"",            modelo:"",                           unidade:"L",   quantidade:1,  preco:20.00, categoria:"alimentacao" },
+  { nome:"Azeite",                 marca:"",            modelo:"",                           unidade:"ml",  quantidade:500,preco:25.00, categoria:"alimentacao" },
+  { nome:"Batata Palha",           marca:"Amacr9c",     modelo:"",                           unidade:"g",   quantidade:400,preco:17.00, categoria:"alimentacao" },
+  { nome:"Cuscuz",                 marca:"Yoki",        modelo:"",                           unidade:"g",   quantidade:500,preco:8.00,  categoria:"alimentacao" },
+  { nome:"Tapioca",                marca:"",            modelo:"",                           unidade:"kg",  quantidade:1,  preco:9.00,  categoria:"alimentacao" },
+  { nome:"Café",                   marca:"Pilão",       modelo:"",                           unidade:"g",   quantidade:500,preco:35.00, categoria:"alimentacao" },
+  { nome:"Seleta",                 marca:"Nature",      modelo:"",                           unidade:"kg",  quantidade:1,  preco:12.90, categoria:"alimentacao" },
+
+  // ── Carnes, Peixes & Congelados ───────────────────────────────────────────────
+  { nome:"Filé de Frango",         marca:"",            modelo:"",                           unidade:"kg",  quantidade:3,  preco:60.00, categoria:"carnes" },
+  { nome:"Cordão Mignon",          marca:"",            modelo:"",                           unidade:"kg",  quantidade:1,  preco:27.00, categoria:"carnes" },
+  { nome:"Carne Moída",            marca:"",            modelo:"",                           unidade:"kg",  quantidade:1,  preco:27.00, categoria:"carnes" },
+  { nome:"Coxão Mole",             marca:"",            modelo:"",                           unidade:"kg",  quantidade:1,  preco:35.00, categoria:"carnes" },
+  { nome:"Ponta de Alcatra",       marca:"",            modelo:"",                           unidade:"kg",  quantidade:1,  preco:35.00, categoria:"carnes" },
+  { nome:"Costela de Porco",       marca:"",            modelo:"",                           unidade:"kg",  quantidade:1,  preco:17.00, categoria:"carnes" },
+  { nome:"Peixe Tilápia",          marca:"Aurora",      modelo:"",                           unidade:"g",   quantidade:800,preco:40.00, categoria:"carnes" },
+  { nome:"Batata Frita",           marca:"",            modelo:"",                           unidade:"kg",  quantidade:2,  preco:26.00, categoria:"carnes" },
+
+  // ── Hortifruti & Lanches ──────────────────────────────────────────────────────
+  { nome:"Hortifruti",             marca:"Diversas",    modelo:"",                           unidade:"un",  quantidade:1,  preco:0,     categoria:"frutas" },
+  { nome:"Pão de Queijo",          marca:"Tradicional", modelo:"",                           unidade:"kg",  quantidade:2,  preco:17.00, categoria:"frutas" },
+  { nome:"Bolacha Salgada",        marca:"Bauducco",    modelo:"",                           unidade:"un",  quantidade:1,  preco:5.50,  categoria:"frutas" },
+  { nome:"Torrada",                marca:"Bauducco",    modelo:"",                           unidade:"un",  quantidade:1,  preco:8.49,  categoria:"frutas" },
+  { nome:"Chá Matte",              marca:"Matte",       modelo:"",                           unidade:"un",  quantidade:1,  preco:14.00, categoria:"frutas" },
 ];
 
 const SUGERIDOS = {
-  alimentacao: ["Macarrão","Azeite","Óleo de Soja","Vinagre","Shoyu","Alho","Milho em Lata","Ervilha","Atum","Biscoito","Extrato de Tomate","Caldo Knorr"],
-  carnes:      ["Frango Inteiro","Coxa e Sobrecoxa","Linguiça","Bacon","Presunto","Camarão","Salsicha","Alcatra","Picanha"],
-  frutas:      ["Mamão","Melancia","Uva","Manga","Abacaxi","Morango","Pera","Alface","Pepino","Beterraba","Brócolis","Couve","Espinafre"],
-  limpeza:     ["Esponja de Aço","Rodo","Vassoura","Pano de Chão","Saco de Lixo","Desengordurante","Limpador de Banheiro"],
-  higiene:     ["Fio Dental","Protetor Solar","Absorvente","Cotonetes","Creme de Barbear","Perfume","Hidratante Facial"],
-  lanches:     ["Biscoito Recheado","Granola","Cereal","Chocolate","Pipoca","Suco de Caixinha","Refrigerante","Água Mineral","Mel","Barra de Cereal"],
+  alimentacao: ["Arroz","Feijão","Macarrão Espaguete","Macarrão Parafuso","Açúcar","Sal","Óleo de Soja","Café","Leite","Molho de Tomate","Farinha de Trigo","Tempero","Sardinha","Ovo","Achocolatado","Iogurte","Farofa Mandioca","Feijão","Tapioca","Azeite","Cuscuz"],
+  limpeza:     ["Detergente Louça","Sabão Líquido","Amaciante","Cloro","Álcool","Saco de Lixo","Papel Toalha","Inseticida","Bom Ar Refil","Lustra Móveis","Refil Inseticida"],
+  higiene:     ["Sabonete","Creme Dental","Papel Higiênico","Desodorante Masc.","Desodorante Fem. (R)","Shampoo Fem.","Shampoo Masc.","Enxaguante Bucal","Creme Corporal","Talco Antisséptico","Leite de Rosas","Acetona"],
+  lanches:     ["Bolacha Salgada","Torrada","Pão de Queijo","Batata Palha","Chá Matte"],
+  carnes:      ["Filé de Frango","Carne Moída","Coxão Mole","Ponta de Alcatra","Costela de Porco","Cordão Mignon","Peixe Tilápia","Batata Frita"],
+  frutas:      ["Hortifruti","Pão de Queijo","Bolacha Salgada","Torrada","Chá Matte"],
 };
 
 let proximoId = LISTA_INICIAL.length + 1;
+// Ajusta proximoId a partir do localStorage ao carregar (evita colisão de ids)
+try {
+  const saved = localStorage.getItem("lc_itens");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      proximoId = Math.max(...parsed.map(i => i.id || 0)) + 1;
+    }
+  }
+} catch {}
 const listaComIds = LISTA_INICIAL.map((item, i) => ({ ...item, id: i + 1 }));
 
 // ─── estilos compartilhados ──────────────────────────────────────────────────
@@ -426,6 +440,37 @@ function TelaListaBase({ itens, setItens, onIrParaPreparar, onVerHistorico, hist
   const [sugestoes,   setSugestoes]   = useState(false);
   const [editando,    setEditando]    = useState(null);
   const [aba,         setAba]         = useState("itens"); // itens | adicionar
+  const [msgImport,   setMsgImport]   = useState("");
+
+  const exportarLista = () => {
+    const blob = new Blob([JSON.stringify(itens, null, 2)], { type:"application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement("a"), { href:url, download:"lista-compras.json" });
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  const importarListaBase = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!Array.isArray(parsed) || !parsed[0]?.nome) throw new Error("Formato inválido");
+        // Garante que todos os itens têm id único
+        const maxId = Math.max(...parsed.map(i=>i.id||0), 0);
+        proximoId = maxId + 1;
+        setItens(parsed);
+        setMsgImport(`✅ ${parsed.length} itens importados com sucesso!`);
+        setTimeout(()=>setMsgImport(""), 4000);
+      } catch(err) {
+        setMsgImport("❌ Arquivo inválido. Use um JSON exportado pelo app.");
+        setTimeout(()=>setMsgImport(""), 4000);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
 
   const adicionarItem = (nomeItem) => {
     const nome = (nomeItem||novoItem).trim();
@@ -461,6 +506,11 @@ function TelaListaBase({ itens, setItens, onIrParaPreparar, onVerHistorico, hist
       {/* Header com abas */}
       <div style={{ background:"rgba(255,255,255,0.04)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(255,255,255,0.08)",padding:"14px 20px 0",position:"sticky",top:0,zIndex:100 }}>
         <div style={{ maxWidth:660,margin:"0 auto" }}>
+          {msgImport&&(
+            <div style={{ background:msgImport.startsWith("✅")?"rgba(16,185,129,0.12)":"rgba(239,68,68,0.12)", border:`1px solid ${msgImport.startsWith("✅")?"rgba(16,185,129,0.3)":"rgba(239,68,68,0.3)"}`, borderRadius:10, padding:"9px 14px", marginBottom:10, fontSize:13, color:msgImport.startsWith("✅")?"#34d399":"#f87171", fontWeight:700 }}>
+              {msgImport}
+            </div>
+          )}
           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12 }}>
             <div style={{ display:"flex",alignItems:"center",gap:12 }}>
               <button onClick={onVoltar} style={{ background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"7px 12px",color:"rgba(255,255,255,0.6)",fontSize:13,fontWeight:700,cursor:"pointer" }}>← Início</button>
@@ -468,6 +518,15 @@ function TelaListaBase({ itens, setItens, onIrParaPreparar, onVerHistorico, hist
                 <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:20 }}>📋 Lista Base</div>
                 <div style={{ fontSize:12,color:"rgba(255,255,255,0.4)",marginTop:1 }}>{itens.filter(i=>i.quantidade>0).length} itens cadastrados</div>
               </div>
+            </div>
+            <div style={{ display:"flex",gap:6 }}>
+              <button onClick={exportarLista} style={{ background:"rgba(99,102,241,0.12)",border:"1px solid rgba(99,102,241,0.25)",borderRadius:9,padding:"7px 11px",color:"#a5b4fc",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
+                ⬇️ Exportar
+              </button>
+              <label style={{ background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:9,padding:"7px 11px",color:"#34d399",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
+                ⬆️ Importar
+                <input type="file" accept=".json" onChange={importarListaBase} style={{ display:"none" }} />
+              </label>
             </div>
           </div>
           {/* Abas */}
@@ -1072,11 +1131,18 @@ function TelaSupermercados({ itens, selecionados, onEscolherSupermercado, onVolt
 
 
 // ─── TELA 3: Comprando ────────────────────────────────────────────────────────
-function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar, supermercado }) {
+function TelaComprando({ itens, selecionados, setSelecionados, setItens, onVoltar, onEncerrar, supermercado }) {
   const [itemConfirmando, setItemConfirmando] = useState(null);
   const [busca,  setBusca]  = useState("");
   const [filtroCat, setFiltroCat] = useState("todas");
   const [confirmarEncerrar, setConfirmarEncerrar] = useState(false);
+  const [adicionandoItem, setAdicionandoItem] = useState(false);
+  // Campos do modal de item rápido
+  const [novoNome,    setNovoNome]    = useState("");
+  const [novaCat,     setNovaCat]     = useState("alimentacao");
+  const [novaQtd,     setNovaQtd]     = useState("1");
+  const [novaUnidade, setNovaUnidade] = useState("un");
+  const [novoPreco,   setNovoPreco]   = useState("");
 
   // Apenas itens selecionados na preparação
   const itensCompra = useMemo(()=>itens.filter(i=>selecionados.includes(i.id)),[itens,selecionados]);
@@ -1087,9 +1153,28 @@ function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar, su
   };
 
   const confirmar = (id,{quantidadeCompra,precoCompra,marca,modelo,detalhe}) => {
-    // preco (base) NÃO é alterado — precoCompra guarda o valor real pago
     setItens(prev=>prev.map(i=>i.id===id?{...i,marcado:true,quantidadeCompra,precoCompra,marca,modelo,detalhe}:i));
     setItemConfirmando(null);
+  };
+
+  const adicionarItemRapido = () => {
+    const nome = novoNome.trim();
+    if (!nome) return;
+    const qtd   = parseFloat(novaQtd)  || 1;
+    const preco = parseFloat(novoPreco) || 0;
+    const novoId = proximoId++;
+    // Cria na lista base E já marca como comprado
+    const novoItem = {
+      id: novoId, nome, marca:"", modelo:"", detalhe:"",
+      quantidade: qtd, quantidadeCompra: qtd,
+      unidade: novaUnidade, categoria: novaCat,
+      preco: preco, precoCompra: preco, marcado: true,
+    };
+    setItens(prev => [...prev, novoItem]);
+    setSelecionados(prev => [...prev, novoId]);
+    // Reset campos
+    setNovoNome(""); setNovaCat("alimentacao"); setNovaQtd("1"); setNovaUnidade("un"); setNovoPreco("");
+    setAdicionandoItem(false);
   };
 
   const filtrados = useMemo(()=>itensCompra.filter(i=>i.nome.toLowerCase().includes(busca.toLowerCase())&&(filtroCat==="todas"||i.categoria===filtroCat)),[itensCompra,busca,filtroCat]);
@@ -1152,6 +1237,56 @@ function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar, su
         </div>
       )}
 
+      {/* Modal — adicionar item rápido */}
+      {adicionandoItem&&(
+        <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"0 0 0 0" }}>
+          <div style={{ background:"#1a1a2e",border:"1px solid rgba(255,255,255,0.12)",borderRadius:"20px 20px 0 0",padding:"24px 20px 32px",width:"100%",maxWidth:480 }}>
+            <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:17,marginBottom:16,color:"#fff" }}>
+              ➕ Adicionar item não previsto
+            </div>
+            {/* Nome */}
+            <label style={{ fontSize:11,color:"rgba(255,255,255,0.4)",fontWeight:700,textTransform:"uppercase",letterSpacing:.8 }}>Nome do produto *</label>
+            <input type="text" value={novoNome} onChange={e=>setNovoNome(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&adicionarItemRapido()}
+              placeholder="ex: Molho de Tomate" autoFocus
+              style={{ ...inpStyle({ width:"100%",boxSizing:"border-box",marginTop:6,marginBottom:12 }) }} />
+            {/* Categoria */}
+            <label style={{ fontSize:11,color:"rgba(255,255,255,0.4)",fontWeight:700,textTransform:"uppercase",letterSpacing:.8 }}>Categoria</label>
+            <select value={novaCat} onChange={e=>setNovaCat(e.target.value)}
+              style={{ ...inpStyle({ width:"100%",boxSizing:"border-box",marginTop:6,marginBottom:12,padding:"12px 10px" }) }}>
+              {Object.entries(CATEGORIAS).map(([k,c])=><option key={k} value={k} style={{ background:"#1a1a2e" }}>{c.emoji} {c.label}</option>)}
+            </select>
+            {/* Qtd + Unidade + Preço */}
+            <div style={{ display:"flex",gap:8,marginBottom:20 }}>
+              <div style={{ flex:1 }}>
+                <label style={{ fontSize:11,color:"rgba(255,255,255,0.4)",fontWeight:700,textTransform:"uppercase",letterSpacing:.8 }}>Qtd</label>
+                <input type="number" value={novaQtd} onChange={e=>setNovaQtd(e.target.value)} min="0.5" step="0.5"
+                  style={{ ...inpStyle({ width:"100%",boxSizing:"border-box",marginTop:6,textAlign:"center" }) }} />
+              </div>
+              <div style={{ width:70 }}>
+                <label style={{ fontSize:11,color:"rgba(255,255,255,0.4)",fontWeight:700,textTransform:"uppercase",letterSpacing:.8 }}>Un.</label>
+                <select value={novaUnidade} onChange={e=>setNovaUnidade(e.target.value)}
+                  style={{ ...inpStyle({ width:"100%",boxSizing:"border-box",marginTop:6,padding:"12px 6px" }) }}>
+                  {["un","kg","g","L","ml","cx","pct","dz","m"].map(u=><option key={u} value={u} style={{ background:"#1a1a2e" }}>{u}</option>)}
+                </select>
+              </div>
+              <div style={{ flex:1 }}>
+                <label style={{ fontSize:11,color:"rgba(255,255,255,0.4)",fontWeight:700,textTransform:"uppercase",letterSpacing:.8 }}>Preço (R$)</label>
+                <input type="number" value={novoPreco} onChange={e=>setNovoPreco(e.target.value)} min="0" step="0.01" placeholder="0,00"
+                  style={{ ...inpStyle({ width:"100%",boxSizing:"border-box",marginTop:6 }) }} />
+              </div>
+            </div>
+            <div style={{ display:"flex",gap:10 }}>
+              <button onClick={()=>setAdicionandoItem(false)} style={{ flex:1,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:12,padding:"13px",color:"rgba(255,255,255,0.55)",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Cancelar</button>
+              <button onClick={adicionarItemRapido} disabled={!novoNome.trim()}
+                style={{ flex:2,background:novoNome.trim()?"linear-gradient(135deg,#10B981,#059669)":"rgba(255,255,255,0.06)",border:"none",borderRadius:12,padding:"13px",color:novoNome.trim()?"#fff":"rgba(255,255,255,0.25)",fontWeight:800,fontSize:14,cursor:novoNome.trim()?"pointer":"not-allowed",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                ✓ Adicionar ao carrinho
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ background:"rgba(255,255,255,0.04)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(255,255,255,0.08)",padding:"16px 20px",position:"sticky",top:0,zIndex:100 }}>
         <div style={{ maxWidth:660,margin:"0 auto" }}>
@@ -1163,10 +1298,14 @@ function TelaComprando({ itens, selecionados, setItens, onVoltar, onEncerrar, su
                 <div style={{ fontSize:12,color:"rgba(255,255,255,0.4)",marginTop:2 }}>{marcados.length} de {itensCompra.length} itens confirmados</div>
               </div>
             </div>
-            <button onClick={()=>setConfirmarEncerrar(true)} disabled={marcados.length===0}
-              style={{ background:marcados.length>0?"linear-gradient(135deg,#10B981,#059669)":"rgba(255,255,255,0.06)",border:"none",borderRadius:12,padding:"10px 16px",color:marcados.length>0?"#fff":"rgba(255,255,255,0.25)",fontWeight:800,fontSize:12,cursor:marcados.length>0?"pointer":"not-allowed",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-              {progresso===100?"✓ Encerrar":"Encerrar aqui"}
-            </button>
+            <div style={{ display:"flex",gap:8 }}>
+              <button onClick={()=>setAdicionandoItem(true)}
+                style={{ background:"rgba(99,102,241,0.15)",border:"1px solid rgba(99,102,241,0.3)",borderRadius:10,padding:"9px 13px",color:"#a5b4fc",fontWeight:800,fontSize:18,cursor:"pointer",lineHeight:1 }}>+</button>
+              <button onClick={()=>setConfirmarEncerrar(true)} disabled={marcados.length===0}
+                style={{ background:marcados.length>0?"linear-gradient(135deg,#10B981,#059669)":"rgba(255,255,255,0.06)",border:"none",borderRadius:12,padding:"10px 16px",color:marcados.length>0?"#fff":"rgba(255,255,255,0.25)",fontWeight:800,fontSize:12,cursor:marcados.length>0?"pointer":"not-allowed",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                {progresso===100?"✓ Encerrar":"Encerrar aqui"}
+              </button>
+            </div>
           </div>
 
           {/* Barra progresso */}
@@ -1900,7 +2039,7 @@ export default function App() {
   if(tela==="base")        return <TelaListaBase        itens={itens} setItens={setItens} onIrParaPreparar={irParaPreparar} onVerHistorico={()=>setTela("historico")} historico={historico} temRascunho={temRascunho} onVoltar={voltarHome} />;
   if(tela==="preparar")    return <TelaPreparar          itens={itens} setItens={setItens} selecionados={selecionados} setSelecionados={setSelecionados} onVoltar={voltarHome} onIrComprar={irLocalizarPrecos} />;
   if(tela==="localizando") return <TelaSupermercados     itens={itens} selecionados={selecionados} onEscolherSupermercado={escolherSupermercado} onVoltar={()=>setTela("home")} />;
-  if(tela==="comprando")   return <TelaComprando         itens={itens} selecionados={selecionados} setItens={setItens} onVoltar={voltarPreparar} onEncerrar={encerrar} supermercado={supermercadoAtual} />;
+  if(tela==="comprando")   return <TelaComprando         itens={itens} selecionados={selecionados} setSelecionados={setSelecionados} setItens={setItens} onVoltar={voltarPreparar} onEncerrar={encerrar} supermercado={supermercadoAtual} />;
   if(tela==="resumo")      return <TelaResumoCompra      registro={registroAtual} onVerHistorico={()=>setTela("historico")} onVoltar={voltarHome} onContinuarCompra={selecionados.length>0?()=>setTela("localizando"):null} />;
   if(tela==="historico")   return <TelaHistorico         historico={historico} onVoltar={voltarHome} onZerarHistorico={zerarHistorico} />;
 }
